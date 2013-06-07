@@ -3,22 +3,19 @@ speech-recognition-tools
 
 Tools for viewing data charts and preparing voice-patterns for speech recognition engine
 
-Features
-========
+## Features
 
 --
 
-Requirements
-============
+## Requirements
 
-* Aquila is a digital signal processing library for C++11. — http://aquila-dsp.org
-* Qwt 6.1-rc3 is a graphics extension to the Qt GUI application framework from Trolltech AS of Norway. It provides a 2D plotting widget and more. - http://sourceforge.net/projects/qwt/
+* [Aquila](http://aquila-dsp.org) is a digital signal processing library for C++11.
+* [Qwt](http://qwt.sf.net) v.6.1-rc3 is a graphics extension to the Qt GUI application framework from Trolltech AS of Norway. It provides a 2D plotting widget and more.
 
-License
-=======
+## Authors
 
---
-
-Authors
-=======
 * Vladimir Zhitko <zhitko.vladimir@gmail.com>
+
+## License
+
+Released under the [MIT License](http://www.opensource.org/licenses/MIT).
