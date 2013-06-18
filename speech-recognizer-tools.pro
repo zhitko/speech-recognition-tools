@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     player.cpp \
     plotter.cpp \
     SpeechDetector.cpp \
-    spectrumplotter.cpp
+    spectrumplotter.cpp \
+    results.cpp
 
 HEADERS  += mainwindow.h \
     consts.h  \
@@ -41,12 +42,14 @@ HEADERS  += mainwindow.h \
     player.h \
     plotter.h \
     SpeechDetector.h \
-    spectrumplotter.h
+    spectrumplotter.h \
+    results.h
 
 FORMS    += mainwindow.ui \
     addtext.ui \
     settings.ui \
-    player.ui
+    player.ui \
+    results.ui
 
 RESOURCES += \
     icons.qrc

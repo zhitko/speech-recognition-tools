@@ -67,11 +67,7 @@ void Recorder::storeBuffer()
     qDebug() << format->sampleRate();
     Aquila::SignalSource source(array.data(),array.size(),format->sampleRate());
     Aquila::WaveFile::save(source, fname.toStdString());
-}
-
-void Recorder::play()
-{
-
+    emit stored(fname);
 }
 
 int Recorder::getMaxVolume()

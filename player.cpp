@@ -105,113 +105,13 @@ void Player::compare()
                          , &res );
             delete ptrn;
             qDebug() << this->ui->items->item(i)->text();
-//            qDebug() << res.key;
             qDebug() << "Dist: " << res.R;
-//            qDebug() << res.pos[0];
-//            qDebug() << res.pos[1];
             qDebug() << "----------";
         }
 
         delete _data;
     }
 }
-
-//void Player::showFormantProcessor()
-//{
-//    Aquila::SignalSource * data = getRawData();
-
-//    if(data != NULL){
-//        Aquila::SignalSource * _data = procHighpassFilter(data);
-//        delete data;
-//        data = procHamming(_data);
-//        delete _data;
-//        Aquila::Spectrogram * spectrogram = procSpectrum(data);
-//        delete data;
-
-//        int * bandIndex = new int[bandNumb+1];
-//        MakeLinIndexTab(startFreq,endFreq,smplFreq, fftOrder, bandIndex, bandNumb+1);
-
-//        Plotter* plotter2 = new Plotter();
-//        plotter2->setTitle("Spectrum (F)");
-//        plotter2->show();
-//        Plotter* plotter5 = new Plotter();
-//        plotter5->setTitle("Spectrum (Fn)");
-//        plotter5->show();
-//        Plotter* plotter3 = new Plotter();
-//        plotter3->setTitle("Spectrum (A)");
-//        plotter3->show();
-
-//        SpectrumPlotter* plotter = new SpectrumPlotter();
-//        plotter->setTitle("Spectrum");
-//        plotter->show();
-
-//        int size = spectrogram->getFrameCount();
-//        float * f1 = new float[size];
-//        float * f2 = new float[size];
-//        float * f3 = new float[size];
-
-//        for (std::size_t x = 0; x < size; x++)
-//        {
-//            int fftSize = spectrogram->getSpectrumSize() / 2;
-//            float * evalVect = new float[bandNumb];
-//            float * pFft = new float[fftSize];
-//            for (std::size_t y = 0; y < fftSize; y++){
-//                pFft[y] = Aquila::dB(spectrogram->getPoint(x, y));
-//            }
-
-//            DivideIntoZones(pFft,fftSize,evalVect,bandNumb,bandIndex,overFact);
-
-//            for (std::size_t y = 0; y < bandNumb; y++)
-//                plotter->addPoint(x, y, evalVect[y]);
-
-//            float byteVector[FrmVectSize*2];
-//            TransformVector2(evalVect,byteVector);
-
-//            plotter2->appendPoint(byteVector[0], QString::number(0));
-//            plotter2->appendPoint(byteVector[1], QString::number(1));
-//            plotter2->appendPoint(byteVector[2], QString::number(2));
-
-//            plotter3->appendPoint(byteVector[3], QString::number(3));
-//            plotter3->appendPoint(byteVector[4], QString::number(4));
-//            plotter3->appendPoint(byteVector[5], QString::number(5));
-//            f1[x] = byteVector[0];
-//            f2[x] = byteVector[1];
-//            f3[x] = byteVector[2];
-
-//            plotter->addSpecPoint(x, byteVector[0], -5.0);
-//            plotter->addSpecPoint(x, byteVector[1], -5.0);
-//            plotter->addSpecPoint(x, byteVector[2], -5.0);
-
-//            delete evalVect;
-//            delete pFft;
-//        }
-//        for(int i=0; i<size; i++){
-//            float fv1 = (f2[i]-1);
-//                if(fv1 < 0.0) fv1 = 0.0;
-//                else if(fv1 > (7-1)) fv1 = 1.0;
-//                else fv1 /= (7-1);
-//            plotter5->appendPoint(fv1, QString::number(0));
-//            float fv2 = (f3[i]-4);
-//                if(fv2 < 0.0) fv2 = 0.0;
-//                else if(fv2 > (29-4)) fv2 = 1.0;
-//                else fv2 /= (29-4);
-//            plotter5->appendPoint(fv2, QString::number(1));
-//            float fv3 = (f1[i]-16);
-//                if(fv3 < 0.0) fv3 = 0.0;
-//                else if(fv3 > (31-16)) fv3 = 1.0;
-//                else fv3 /= (31-16);
-//            plotter5->appendPoint(fv3, QString::number(2));
-//        }
-
-//        plotter->applyPlot();
-//        plotter2->applyPlot();
-//        plotter3->applyPlot();
-//        plotter5->applyPlot();
-
-//        delete f1,f2,f3;
-//        delete spectrogram;
-//    }
-//}
 
 void Player::showFormantProcessor()
 {
@@ -237,6 +137,9 @@ void Player::showFormantProcessor()
         Plotter* plotterA = new Plotter();
         plotterA->setTitle("Spectrum (A)");
         plotterA->show();
+        Plotter* plotterFF = new Plotter();
+        plotterFF->setTitle("Spectrum (Fn')");
+        plotterFF->show();
 
         for(int i=0; i<params.count(); i++){
                 plotterF->appendPoint(params.frame(i).sample(0), QString::number(0));
@@ -246,10 +149,15 @@ void Player::showFormantProcessor()
                 plotterA->appendPoint(params.frame(i).sample(3), QString::number(3));
                 plotterA->appendPoint(params.frame(i).sample(4), QString::number(4));
                 plotterA->appendPoint(params.frame(i).sample(5), QString::number(5));
+
+                plotterFF->appendPoint(params.frame(i).sample(6), QString::number(0));
+                plotterFF->appendPoint(params.frame(i).sample(7), QString::number(1));
+                plotterFF->appendPoint(params.frame(i).sample(8), QString::number(2));
         }
 
-        plotterF->applyPlot();
-        plotterA->applyPlot();
+        plotterFF->applyPlot();
+        plotterFF->applyPlot();
+        plotterFF->applyPlot();
 
         delete _data;
     }

@@ -15,12 +15,12 @@ public:
     explicit Recorder(QAudioFormat * format, QObject *parent = 0);
 
     void record(QString word);
-    void play();
     int getMaxVolume();
     
 signals:
     void volume(int volume);
     void active(bool);
+    void stored(QString);
 
 public slots:
     void update();

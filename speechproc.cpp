@@ -55,7 +55,7 @@ Aquila::Spectrogram * procSpectrum(Aquila::SignalSource * source)
     return new Aquila::Spectrogram(frames);
 }
 
-Aquila::SignalSource  * procChannels(Aquila::Spectrogram * spectrogram)
+Aquila::SignalSource * procChannels(Aquila::Spectrogram * spectrogram)
 {
     int * bandIndex = new int[bandNumb+1];
     MakeLinIndexTab(startFreq,endFreq,smplFreq, fftOrder, bandIndex, bandNumb+1);
@@ -90,34 +90,70 @@ Aquila::SignalSource * procParams(Aquila::FramesCollection *channels)
     int size = channels->count();
     std::vector<Aquila::SampleType> * data = new std::vector<Aquila::SampleType>(size*count, 0.0);
 
-    for (std::size_t x = 0; x < size; x++)
+    for (std::size_t x = 1; x < size; x++)
     {
         double byteVector[FrmVectSize*2];
-        TransformVector2(channels->frame(x).toArray(),byteVector);
+        TransformVector(channels->frame(x).toArray(),byteVector);
 
         float fv0 = (byteVector[1]-1);
-            if(fv0 < 0.0) fv0 = 0.0;
-            else if(fv0 > (7-1)) fv0 = 1.0;
-            else fv0 /= (7-1);
+        if(fv0 < 0.0) fv0 = 0.0;
+        else if(fv0 > (7-1)) fv0 = 1.0;
+        else fv0 /= (7-1);
 
         float fv1 = (byteVector[2]-4);
-            if(fv1 < 0.0) fv1 = 0.0;
-            else if(fv1 > (29-4)) fv1 = 1.0;
-            else fv1 /= (29-4);
+        if(fv1 < 0.0) fv1 = 0.0;
+        else if(fv1 > (29-4)) fv1 = 1.0;
+        else fv1 /= (29-4);
 
         float fv2 = (byteVector[0]-16);
-            if(fv2 < 0.0) fv2 = 0.0;
-            else if(fv2 > (31-16)) fv2 = 1.0;
-            else fv2 /= (31-16);
+        if(fv2 < 0.0) fv2 = 0.0;
+        else if(fv2 > (31-16)) fv2 = 1.0;
+        else fv2 /= (31-16);
 
         (*data)[x*count+0] = fv0;
         (*data)[x*count+1] = fv1;
         (*data)[x*count+2] = fv2;
+
+        (*data)[x*count+6] = abs(fv0 - (*data)[(x-1)*count+0]);
+        (*data)[x*count+7] = abs(fv1 - (*data)[(x-1)*count+1]);
+        (*data)[x*count+8] = abs(fv2 - (*data)[(x-1)*count+2]);
+
         (*data)[x*count+3] = byteVector[3];
         (*data)[x*count+4] = byteVector[4];
         (*data)[x*count+5] = byteVector[5];
     }
     return new Aquila::SignalSource(*data);
+}
+
+int compare(Aquila::SignalSource * source, Aquila::SignalSource * pattern)
+{
+    CONTRES res;
+    res.R = -1;
+    res.key = -1;
+    res.pos[0] = -1;
+    res.pos[1] = -1;
+    DynTimeWarping(((*source)*255).toArray(),   source->getSamplesCount()/FrmVectSize
+                 , ((*pattern)*255).toArray(),  pattern->getSamplesCount()/FrmVectSize
+                 , &res );
+    return res.R;
+}
+
+Aquila::SignalSource * proc(std::string name)
+{
+    Aquila::SignalSource * data = new Aquila::WaveFile(name);
+
+    Aquila::SignalSource * _data = procHighpassFilter(data);
+    delete data;
+    data = procHamming(_data);
+    delete _data;
+    Aquila::Spectrogram * spectrogram = procSpectrum(data);
+    delete data;
+    data = procChannels(spectrogram);
+    Aquila::FramesCollection channels(*data, bandNumb);
+    delete spectrogram;
+    _data = procParams(&channels);
+    delete data;
+    return _data;
 }
 
 bool AdjustBandIndexTab(int * indTab, int size, double resolution)
@@ -215,7 +251,7 @@ bool DivideIntoZones(Aquila::SampleType * inBank, int inSize, Aquila::SampleType
     }
 }
 
-int TransformVector2(const double * pIn, double *pOut)
+int TransformVector(const double * pIn, double *pOut)
 {
     double p = 0.3;
     double min = pIn[0];
@@ -245,112 +281,6 @@ int TransformVector2(const double * pIn, double *pOut)
         pOut[n] /= (Amax[i]-Amin[i]);
     }
 }
-
-int TransformVector(double * pIn, double *pOut)
-{
-    int i;
-    double val;
-    int res;
-/*
-    // Amplitude parameters
-    for(i=0,val=0.0f; i < 8; i++)
-        if(pIn[i] > val)
-            val=pIn[i];
-    val*=16;
-//        if(val > 255.0f)
-//            val=255.0f;
-    pOut[FrmVectSize+3]=val;  //A1
-
-    for(i=8,val=0.0f; i < 24; i++)
-        if(pIn[i] > val)
-            val=pIn[i];
-    val*=16;
-//        if(val > 255.0f)
-//            val=255.0f;
-    pOut[FrmVectSize+4]=val;  //A2
-
-    for(i=24,val=0.0f; i < SpkVectSize; i++)
-        if(pIn[i] > val)
-            val=pIn[i];
-    val*=16;
-//        if(val > 255.0f)
-//            val=255.0f;
-    pOut[FrmVectSize+5]=val;   //A3
-*/
-    //Spectrum Normalize
-    for(i=0,val=0.0f; i < SpkVectSize; i++)
-        val+=pIn[i];
-    val=val*8/SpkVectSize;
-    if(val == 0)
-        val=1.0f;
-    for(i=0; i < SpkVectSize; i++)
-    {
-        if(pIn[i] >= val)
-            pIn[i]=255.0f;
-        else
-        {
-            res=(int)(pIn[i]*255.0f/val);
-            pIn[i]=(double)res;
-        }
-    }
-
-    //Frequency parameters
-    double Fmin[FrmVectSize/2]={1,4,16};
-    double Fmax[FrmVectSize/2]={7,29,31};
-    double k,l,m;
-    double cg[3];
-    double frm[3];
-
-    cg[0]=FindGrCenter(pIn,Fmin[0],Fmax[1]);
-    if(cg[0]-(int)cg[0] >= 0.5)
-        cg[0]++;
-    cg[1]=FindGrCenter(pIn,cg[0],Fmax[2]);
-    if(cg[1]-(int)cg[1] >= 0.5)
-        cg[1]++;
-
-    if(cg[0] <= Fmax[0])
-        m=cg[0];
-    else
-        m=Fmax[0];
-    cg[2]=FindGrCenter(pIn,0,m);
-    if(cg[2]-(int)cg[2] >= 0.5)
-        cg[2]++;
-    cg[2]=(double)((int)cg[2]);
-
-    k=(m-cg[2]);
-    l=cg[2];
-    if(k < l)
-        l=k;
-    frm[0]=FindGrCenter(pIn,(cg[2]-l),(cg[2]+l));  //F1
-
-    if(cg[0] < Fmin[1])
-        cg[0]=Fmin[1];
-
-    if(cg[1] > Fmax[1])
-        cg[1]=Fmax[1];
-    cg[0]=frm[0]+1+(cg[0]-frm[0])/2;
-    if(cg[0]-(int)cg[0] >= 0.5)
-        cg[0]++;
-    cg[0]=(double)((int)cg[0]);
-    cg[2]=FindGrCenter(pIn,cg[0],cg[1]);
-    if(cg[2]-(int)cg[2] >= 0.5)
-        cg[2]++;
-    cg[2]=(double)((int)cg[2]);
-
-    l=(cg[2]-cg[0]);
-    if(cg[1]-cg[2] < l)
-        l=(cg[1]-cg[2]);
-    frm[1]=FindGrCenter(pIn,(cg[2]-l),(cg[2]+l));  //F2
-
-    frm[2]=frm[1]-frm[0];  //F2-F1
-
-    pOut[0] = frm[0];
-    pOut[1] = frm[1];
-    pOut[2] = frm[2];
-//    FreqNorm(frm,pOut);
-    return 0;
-}
-
 
 double FindGrCenter(double *dst,double l,double r)
 {

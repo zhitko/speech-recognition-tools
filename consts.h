@@ -7,7 +7,7 @@ const int CSpectrogramFrameSize = 512;
 const int CSpectrogramFrameOverlapSize = CSpectrogramFrameSize/4*3;
 
 const int SpkVectSize = 32;
-const int FrmVectSize = 6;
+const int FrmVectSize = 9;
 
 const int startFreq = 0;
 const int endFreq = 8000;

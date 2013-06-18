@@ -1,6 +1,8 @@
 #ifndef SPEECHPROC_H
 #define SPEECHPROC_H
 
+#include <string>
+
 namespace Aquila {
     class SignalSource;
     class Spectrogram;
@@ -21,11 +23,13 @@ Aquila::Spectrogram  * procSpectrum(Aquila::SignalSource *);
 Aquila::SignalSource * procChannels(Aquila::Spectrogram *);
 Aquila::SignalSource * procParams(Aquila::FramesCollection *);
 
+Aquila::SignalSource * proc(std::string);
+int compare(Aquila::SignalSource *, Aquila::SignalSource *);
+
 bool AdjustBandIndexTab(int * indTab, int size, double resolution);
 bool MakeLinIndexTab(double minFreq, double maxFreq, double smpFreq, int fftOrder, int * indTab, int tabSize);
 bool DivideIntoZones(double * inBank, int inSize, double * outBank, int bandNum, int * indTab, int overFact);
-int TransformVector(double * pIn, double *pOut);
-int TransformVector2(const double * pIn, double *pOut);
+int TransformVector(const double * pIn, double *pOut);
 double FindGrCenter(double *dst,double l,double r);
 void FreqNorm(double *pIn, double *pOut);
 long GetDist(const double *ptn,const double *spk,int num);
