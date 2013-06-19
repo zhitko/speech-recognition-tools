@@ -338,19 +338,22 @@ long GetDist(const double *ptn,const double *spk,int num)
 
 int DynTimeWarping(const double * prlz, int rlzSize, const double * pptn, int ptnSize, CONTRES* pcres)
 {
-    long** M = new long*[MaxNcadr];
-    memset(M, 0, sizeof(long*) * MaxNcadr);
-    for (int i = 0; i < MaxNcadr; i++)
-        M[i] = new long[MaxNcadr];
-    double* buf_d = new double[MaxNcadr];
-    double* buf_t = new double[MaxNcadr];
+    long** M = new long*[rlzSize];
+    memset(M, 0, sizeof(long*) * rlzSize);
+    for (int i = 0; i < rlzSize; i++)
+        M[i] = new long[ptnSize];
+    double* buf_d = new double[rlzSize];
+    double* buf_t = new double[rlzSize];
 
     int num = FrmVectSize;
     int i,j;
     long val[3];
     int del;
     int res;
-    int T[2][MaxNcadr];
+    int T[2][ptnSize];
+//    int** T = new int[2];
+//    T[0] = new int[ptnSize];
+//    T[0] = new int[ptnSize];
     double koff;
 
     koff=256.0/ptnSize;
@@ -420,5 +423,10 @@ int DynTimeWarping(const double * prlz, int rlzSize, const double * pptn, int pt
     else
         pcres->key=0;
 
+    delete buf_d;
+    delete buf_t;
+    for (int i = 0; i < rlzSize; i++)
+        delete M[i];
+    delete M;
     return(*(buf_d+res));
 }
